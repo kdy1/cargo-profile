@@ -1,7 +1,9 @@
 use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
+use cargo_metadata::ArtifactProfile;
 use cargo_metadata::Message;
+use is_executable::IsExecutable;
 use std::env;
 use std::io::BufReader;
 use std::path::PathBuf;
@@ -10,9 +12,12 @@ use std::process::Stdio;
 use structopt::StructOpt;
 
 /// Built bin file.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BinFile {
     pub path: PathBuf,
+    /// `.dSYM`,
+    pub extra_files: Vec<PathBuf>,
+    pub profile: ArtifactProfile,
 }
 
 #[derive(Debug, Clone, StructOpt)]
@@ -119,20 +124,52 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
         .spawn()
         .with_context(|| format!("failed to spawn cargo\n{}", cmd_str))?;
 
+    let mut binaries = vec![];
     let reader = BufReader::new(child.stdout.take().unwrap());
     for message in Message::parse_stream(reader) {
         match message.unwrap() {
             Message::CompilerMessage(msg) => {
-                println!("{:?}", msg);
+                eprintln!("{}", msg.message.message);
             }
-            Message::CompilerArtifact(artifact) => {
-                println!("{:?}", artifact);
+            Message::CompilerArtifact(mut artifact) => {
+                if artifact.target.kind.contains(&"bin".to_string()) {
+                    let mut executable = None;
+
+                    artifact.filenames.retain(|path| {
+                        if executable.is_none() {
+                            if path.is_executable() {
+                                executable = Some(path.clone());
+                                return false;
+                            }
+                        }
+
+                        true
+                    });
+
+                    binaries.push(BinFile {
+                        path: match executable {
+                            Some(v) => v,
+                            None => continue,
+                        },
+                        extra_files: artifact.filenames,
+                        profile: artifact.profile,
+                    });
+                    continue;
+                }
+
+                if artifact.target.kind == vec!["lib".to_string()] {
+                    continue;
+                }
+                // println!("{:?}", artifact);
             }
-            Message::BuildScriptExecuted(script) => {
-                println!("{:?}", script);
+            Message::BuildScriptExecuted(_script) => {
+                // eprintln!("Executed build script of `{}`",
+                // script.package_id.repr);
             }
             Message::BuildFinished(finished) => {
-                println!("{:?}", finished);
+                if !finished.success {
+                    bail!("Failed to compile binary using cargo\n{}", cmd_str)
+                }
             }
             _ => (),
         }
@@ -142,5 +179,9 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
         .wait()
         .with_context(|| format!("Couldn't get cargo's exit status\n{}", cmd_str))?;
 
-    bail!("cargo did not produced any useful binary\n{}", cmd_str)
+    if binaries.is_empty() {
+        bail!("cargo did not produced any useful binary\n{}", cmd_str)
+    }
+
+    Ok(binaries)
 }

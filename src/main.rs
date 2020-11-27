@@ -21,6 +21,9 @@ pub enum Command {
         /// Compile library
         #[structopt(subcommand)]
         target: CargoTarget,
+
+        #[structopt(long)]
+        release: bool,
     },
 }
 
@@ -29,8 +32,12 @@ fn main() -> Result<(), Error> {
 
     match cmd {
         Command::All => {}
-        Command::Flamegraph { root, target } => {
-            compile(true, &target).context("cargo execution failed")?;
+        Command::Flamegraph {
+            root,
+            target,
+            release,
+        } => {
+            compile(release, &target).context("cargo execution failed")?;
         }
     }
 
