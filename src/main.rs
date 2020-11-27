@@ -12,7 +12,7 @@ mod flamegraph;
 mod trace;
 
 #[derive(StructOpt)]
-#[structopt(about = "The performance profiler for cargo")]
+#[structopt(author, about = "The performance profiler for cargo")]
 pub enum SubCommand {
     /// NOT IMPLEMENTED YET. Run all benchmark and store result as a json file.
     All,
