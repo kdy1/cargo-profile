@@ -1,5 +1,5 @@
 [package]
-authors = ["강동윤 <kdy1997.dev@gmail.com>"]
+authors = ["강동윤 <kdy1@dudy.kr"]
 description = "Cargo subcommand to profile performance"
 edition = "2018"
 license = "Apache-2.0/MIT"
