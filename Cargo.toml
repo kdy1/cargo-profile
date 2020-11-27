@@ -1,9 +1,13 @@
 [package]
-name = "cargo-profile"
-version = "0.1.0"
 authors = ["강동윤 <kdy1997.dev@gmail.com>"]
+description = "Cargo subcommand to profile performance"
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "Apache-2.0/MIT"
+name = "cargo-profile"
+repository = "https://github.com/kdy1/cargo-profile.git"
+version = "0.1.0"
 
 [dependencies]
+anyhow = "1"
+cargo_metadata = "0.12.1"
+structopt = {version = "0.3"}
