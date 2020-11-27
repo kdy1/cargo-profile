@@ -1,3 +1,7 @@
 /target
 Cargo.lock
 flamegraph.svg
+
+# xctrace
+*.trace
+.DS_Store
