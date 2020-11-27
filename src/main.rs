@@ -49,7 +49,7 @@ pub enum SubCommand {
 fn main() -> Result<(), Error> {
     let mut args = env::args_os().collect::<Vec<_>>();
 
-    if env::var("CARGO").is_ok() {
+    if args.first().unwrap() == "cargo" && env::var("CARGO").is_ok() {
         args.remove(1);
     };
 
