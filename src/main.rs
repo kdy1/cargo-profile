@@ -1,3 +1,4 @@
+use crate::trace::TraceCommand;
 use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
@@ -8,14 +9,14 @@ use structopt::StructOpt;
 
 mod cargo;
 mod flamegraph;
-mod perf_report;
+mod trace;
 
 #[derive(StructOpt)]
 #[structopt(about = "The performance profiler for cargo")]
 pub enum SubCommand {
     /// NOT IMPLEMENTED YET. Run all benchmark and store result as a json file.
     All,
-    /// Create a flamegraph for given target
+    /// NOT IMPLEMENTED YET. Create a flamegraph for given target
     Flamegraph {
         /// Use sudo.
         #[structopt(long)]
@@ -29,23 +30,13 @@ pub enum SubCommand {
         release: bool,
     },
 
-    PerfReport {
-        /// Use sudo.
-        #[structopt(long)]
-        root: bool,
-
-        /// Compile library
-        #[structopt(subcommand)]
-        target: CargoTarget,
-
-        #[structopt(long)]
-        release: bool,
-    },
+    /// Invokes tracing tool.
+    Trace(TraceCommand),
 
     /// Compile a binary using cargo and print absolute path to the file.
     ///
     /// Usage: perf record `cargo profile get-bin bench --bench fixture`
-    GetBin {
+    BinPath {
         /// Compile library
         #[structopt(subcommand)]
         target: CargoTarget,
@@ -74,18 +65,7 @@ fn main() -> Result<(), Error> {
             compile(release, &target).context("cargo execution failed")?;
         }
 
-        SubCommand::PerfReport {
-            root,
-            target,
-            release,
-        } => {
-            let binaries = compile(release, &target).context("cargo execution failed")?;
-            for file in &binaries {
-                self::perf_report::profile(file).context("perf-report failed")?;
-            }
-        }
-
-        SubCommand::GetBin { target, release } => {
+        SubCommand::BinPath { target, release } => {
             let binraries = compile(release, &target).context("cargo execution failed")?;
             if binraries.len() != 1 {
                 bail!(
@@ -95,6 +75,7 @@ fn main() -> Result<(), Error> {
             }
             print!("{}", binraries[0].path.display());
         }
+        SubCommand::Trace(trace) => trace.run().context("failed to trace")?,
     }
 
     Ok(())

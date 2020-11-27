@@ -4,7 +4,7 @@ use anyhow::Error;
 use std::process::Command;
 use std::process::Stdio;
 
-pub fn profile(file: &BinFile) -> Result<(), Error> {
+pub fn run_xctrace(file: &BinFile) -> Result<(), Error> {
     let mut cmd = Command::new("xcrun");
 
     cmd.stdin(Stdio::inherit())
