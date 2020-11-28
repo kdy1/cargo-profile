@@ -19,7 +19,6 @@ mod macos;
 
 /// Creates a flamegraph for given target. This command
 #[derive(Debug, Clone, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
 pub struct FlameGraphCommand {
     /// Use sudo.
     #[structopt(long)]
@@ -31,8 +30,6 @@ pub struct FlameGraphCommand {
 
     #[structopt(long)]
     release: bool,
-
-    args: Vec<String>,
 }
 
 #[cfg(unix)]
@@ -56,7 +53,6 @@ impl FlameGraphCommand {
             root,
             target,
             release,
-            args,
         } = self;
 
         let binaries = compile(release, &target).context("cargo execution failed")?;
@@ -83,10 +79,10 @@ impl FlameGraphCommand {
                     &dir.path().join(self::macos::DTRACE_OUTPUT_FILENAME),
                     None,
                     None,
-                    &args,
+                    target.args(),
                 )?
             } else if cfg!(target_os = "linux") {
-                self::linux::perf(root, binary, None, &args)?
+                self::linux::perf(root, binary, None, target.args())?
             } else {
                 bail!("cargo profile flamegraph currently supports only `linux` and `macos`")
             };

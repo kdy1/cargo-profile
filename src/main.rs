@@ -14,7 +14,11 @@ mod trace;
 mod util;
 
 #[derive(StructOpt)]
-#[structopt(author, about = "The performance profiler for cargo")]
+#[structopt(
+    name = "cargo profile",
+    author,
+    about = "The performance profiler for cargo"
+)]
 pub enum SubCommand {
     /// WIP. Run all benchmark and store result as a json file.
     All,

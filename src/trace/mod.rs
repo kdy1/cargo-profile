@@ -21,8 +21,6 @@ pub struct TraceCommand {
 
     #[structopt(subcommand)]
     tool: TraceTool,
-
-    args: Vec<String>,
 }
 
 impl TraceCommand {
@@ -31,16 +29,11 @@ impl TraceCommand {
             root,
             release,
             tool,
-            args,
         } = self;
 
-        let binaries = match &tool {
-            TraceTool::Dtrace { target }
-            | TraceTool::Perf { target }
-            | TraceTool::Xctrace { target } => {
-                compile(release, target).context("cargo execution failed")?
-            }
-        };
+        let target = tool.target();
+
+        let binaries = compile(release, target).context("cargo execution failed")?;
 
         if binaries.len() != 1 {
             bail!(
@@ -55,7 +48,7 @@ impl TraceCommand {
             TraceTool::Dtrace { .. } => {}
             TraceTool::Perf { .. } => {}
             TraceTool::Xctrace { .. } => {
-                run_xctrace(root, &binary, &args).context("failed to run xctrace")?;
+                run_xctrace(root, &binary, target.args()).context("failed to run xctrace")?;
             }
         }
 
@@ -84,4 +77,14 @@ pub enum TraceTool {
         #[structopt(subcommand)]
         target: CargoTarget,
     },
+}
+
+impl TraceTool {
+    pub fn target(&self) -> &CargoTarget {
+        match self {
+            TraceTool::Dtrace { target }
+            | TraceTool::Perf { target }
+            | TraceTool::Xctrace { target } => target,
+        }
+    }
 }

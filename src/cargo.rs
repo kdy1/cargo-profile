@@ -21,6 +21,7 @@ pub struct BinFile {
 }
 
 #[derive(Debug, Clone, StructOpt)]
+#[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
 pub struct TestSpecifier {
     #[structopt(long)]
     pub lib: bool,
@@ -30,9 +31,12 @@ pub struct TestSpecifier {
 
     #[structopt(long)]
     pub tests: bool,
+
+    args: Vec<String>,
 }
 
 #[derive(Debug, Clone, StructOpt)]
+#[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
 pub struct BenchSpecifier {
     #[structopt(long)]
     pub lib: bool,
@@ -42,15 +46,18 @@ pub struct BenchSpecifier {
 
     #[structopt(long)]
     pub benches: bool,
+
+    args: Vec<String>,
 }
 
 #[derive(Debug, Clone, StructOpt)]
+#[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
 pub enum CargoTarget {
-    Bin { name: String },
+    Bin { name: String, args: Vec<String> },
     Bench(BenchSpecifier),
     Test(TestSpecifier),
-    Exmaple { name: String },
-    Examples,
+    Exmaple { name: String, args: Vec<String> },
+    Examples { args: Vec<String> },
 }
 
 impl CargoTarget {
@@ -58,6 +65,16 @@ impl CargoTarget {
         match self {
             CargoTarget::Bench(_) => false,
             _ => true,
+        }
+    }
+
+    pub fn args(&self) -> &[String] {
+        match self {
+            CargoTarget::Exmaple { args, .. }
+            | CargoTarget::Examples { args, .. }
+            | CargoTarget::Bin { args, .. } => &args,
+            CargoTarget::Bench(b) => &b.args,
+            CargoTarget::Test(t) => &t.args,
         }
     }
 }
@@ -69,7 +86,7 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
     let mut cmd = Command::new(&cargo);
 
     match target {
-        CargoTarget::Bin { name } => {
+        CargoTarget::Bin { name, .. } => {
             cmd.arg("build").arg("--bin").arg(name);
         }
         CargoTarget::Bench(kind) => {
@@ -103,10 +120,10 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
                 cmd.arg("--tests");
             }
         }
-        CargoTarget::Exmaple { name } => {
+        CargoTarget::Exmaple { name, .. } => {
             cmd.arg("build").arg("--example").arg(name);
         }
-        CargoTarget::Examples => {
+        CargoTarget::Examples { .. } => {
             cmd.arg("build").arg("--examples");
         }
     }
