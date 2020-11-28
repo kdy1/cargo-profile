@@ -1,6 +1,10 @@
+use crate::cargo::compile;
 use crate::cargo::CargoTarget;
+use anyhow::bail;
+use anyhow::Context;
 use anyhow::Error;
 use structopt::StructOpt;
+use xctrace::run_xctrace;
 
 pub mod xctrace;
 
@@ -25,10 +29,29 @@ impl TraceCommand {
             tool,
         } = self;
 
+        let binaries = match &tool {
+            TraceTool::Dtrace { target }
+            | TraceTool::Perf { target }
+            | TraceTool::Xctrace { target } => {
+                compile(release, target).context("cargo execution failed")?
+            }
+        };
+
+        if binaries.len() != 1 {
+            bail!(
+                "cargo profile trace expects cargo to produce one binary file, but got {} files",
+                binaries.len()
+            )
+        }
+
+        let binary = binaries.into_iter().next().unwrap();
+
         match tool {
-            TraceTool::Dtrace { target } => {}
-            TraceTool::Perf { target } => {}
-            TraceTool::Xctrace { target } => {}
+            TraceTool::Dtrace { .. } => {}
+            TraceTool::Perf { .. } => {}
+            TraceTool::Xctrace { .. } => {
+                run_xctrace(root, &binary).context("failed to run xctrace")?;
+            }
         }
 
         Ok(())
@@ -38,16 +61,19 @@ impl TraceCommand {
 /// Tool used to generate trace.
 #[derive(Debug, Clone, StructOpt)]
 pub enum TraceTool {
+    /// WIP
     Dtrace {
         /// Compile library
         #[structopt(subcommand)]
         target: CargoTarget,
     },
+    /// WIP
     Perf {
         /// Compile library
         #[structopt(subcommand)]
         target: CargoTarget,
     },
+    /// Invokes xctrace to create `.trace` file.
     Xctrace {
         /// Compile library
         #[structopt(subcommand)]

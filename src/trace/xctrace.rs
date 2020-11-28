@@ -1,11 +1,11 @@
 use crate::cargo::BinFile;
+use crate::util::command;
 use anyhow::Context;
 use anyhow::Error;
-use std::process::Command;
 use std::process::Stdio;
 
-pub fn run_xctrace(file: &BinFile) -> Result<(), Error> {
-    let mut cmd = Command::new("xcrun");
+pub fn run_xctrace(root: bool, file: &BinFile) -> Result<(), Error> {
+    let mut cmd = command(root, "xcrun");
 
     cmd.stdin(Stdio::inherit())
         .stderr(Stdio::inherit())

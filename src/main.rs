@@ -76,6 +76,7 @@ fn main() -> Result<(), Error> {
             }
             print!("{}", binraries[0].path.display());
         }
+
         SubCommand::Trace(trace) => trace.run().context("failed to trace")?,
     }
 
