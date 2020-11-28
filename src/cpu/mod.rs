@@ -96,8 +96,6 @@ fn process_collapsed(data: &str) -> Result<(), Error> {
                 item = item.trim_end_matches(|c: char| c.is_digit(10) || c == ' ');
             }
 
-            println!("Correct item: {}", item);
-
             *fn_time_including_deps.entry(item).or_default() += 1;
             if is_last {
                 // TODO: This is wrong.
