@@ -6,6 +6,7 @@ use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use structopt::StructOpt;
 use tempdir::TempDir;
 
@@ -64,8 +65,18 @@ impl CpuCommand {
 
                     let collapsed = String::from_utf8_lossy(&collapsed);
 
-                    process_collapsed(&collapsed)
+                    let (time, mut data) = process_collapsed(&collapsed)
                         .context("failed to process collapsed stack data")?;
+                    data.sort_by_key(|info| info.total_used);
+
+                    for info in data.iter().rev() {
+                        println!(
+                            "{}: {}% {}%",
+                            info.name,
+                            info.total_used as f64 / time as f64 * 100f64,
+                            info.self_used as f64 / time as f64 * 100f64
+                        );
+                    }
                 }
 
                 Ok(())
@@ -74,20 +85,64 @@ impl CpuCommand {
     }
 }
 
-fn process_collapsed(data: &str) -> Result<(), Error> {
+struct FnTimingInfo {
+    name: String,
+    total_used: usize,
+    /// The percentage of time used by function code itself.
+    self_used: usize,
+}
+
+fn process_collapsed(data: &str) -> Result<(usize, Vec<FnTimingInfo>), Error> {
     let mut lines: Vec<&str> = data.lines().into_iter().collect();
     lines.reverse();
     let (frames, time, ignored) =
         merge::frames(lines, true).context("failed to merge collapsed stack frame")?;
 
-    let mut time_used_by_fns = HashMap::<_, f64>::new();
-
-    for frame in &frames {
-        let dur = frame.end_time - frame.start_time;
-        *time_used_by_fns.entry(frame.location.function).or_default() += dur as f64 / time as f64;
+    if time == 0 {
+        bail!("No stack counts found")
     }
 
-    dbg!(&time_used_by_fns);
+    if ignored > 0 {
+        eprintln!("ignored {} lines with invalid format", ignored)
+    }
 
-    todo!()
+    let mut total_time = HashMap::<_, usize>::new();
+    let mut itself_time = HashMap::<_, usize>::new();
+
+    // Check if time collapses
+    for frame in &frames {
+        let fn_dur = frame.end_time - frame.start_time;
+        *total_time.entry(frame.location.function).or_default() += fn_dur;
+
+        let children = frames.iter().filter(|child| {
+            frame.location.depth + 1 == child.location.depth
+                && frame.start_time <= child.start_time
+                && child.end_time <= frame.end_time
+        });
+
+        let mut itself_dur = fn_dur;
+
+        for child in children {
+            let fn_dur = child.end_time - child.start_time;
+            itself_dur -= fn_dur;
+        }
+
+        *itself_time.entry(frame.location.function).or_default() += itself_dur;
+    }
+
+    let mut result = vec![];
+    let mut done = HashSet::new();
+
+    for frame in &frames {
+        if !done.insert(&frame.location.function) {
+            continue;
+        }
+        result.push(FnTimingInfo {
+            name: frame.location.function.to_string(),
+            total_used: *total_time.entry(frame.location.function).or_default(),
+            self_used: *itself_time.entry(frame.location.function).or_default(),
+        });
+    }
+
+    Ok((time, result))
 }
