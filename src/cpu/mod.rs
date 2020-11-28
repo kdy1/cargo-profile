@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::cargo::compile;
 use crate::cargo::CargoTarget;
 use crate::cli_tools::dtrace::make_dtrace_command;
@@ -7,8 +5,11 @@ use crate::cli_tools::profiler::run_profiler;
 use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
+use std::collections::HashMap;
 use structopt::StructOpt;
 use tempdir::TempDir;
+
+mod merge;
 
 /// WIP: Profiles cpu usage.
 #[derive(Debug, Clone, StructOpt)]
@@ -74,37 +75,19 @@ impl CpuCommand {
 }
 
 fn process_collapsed(data: &str) -> Result<(), Error> {
-    let mut fn_time_including_deps = HashMap::<_, usize>::new();
-    let mut fn_time_itself = HashMap::<_, usize>::new();
+    let mut lines: Vec<&str> = data.lines().into_iter().collect();
+    lines.reverse();
+    let (frames, time, ignored) =
+        merge::frames(lines, true).context("failed to merge collapsed stack frame")?;
 
-    for line in data.lines() {
-        let items = line.split(";");
-        let items_count = items.clone().count();
+    let mut time_used_by_fns = HashMap::<_, f64>::new();
 
-        for (idx, mut item) in items.enumerate() {
-            let is_last = idx == items_count - 1;
-
-            // println!("Item: {}", item);
-
-            let splitted = item.split('`');
-            if splitted.clone().count() != 2 {
-                log::warn!("process_collapsed: ignoring wrong item (not separated by '`')");
-                continue;
-            }
-
-            if is_last {
-                item = item.trim_end_matches(|c: char| c.is_digit(10) || c == ' ');
-            }
-
-            *fn_time_including_deps.entry(item).or_default() += 1;
-            if is_last {
-                // TODO: This is wrong.
-                *fn_time_itself.entry(item).or_default() += 1;
-            }
-        }
+    for frame in &frames {
+        let dur = frame.end_time - frame.start_time;
+        *time_used_by_fns.entry(frame.location.function).or_default() += dur as f64 / time as f64;
     }
 
-    // println!("{:#?}", fn_time_including_deps);
+    dbg!(&time_used_by_fns);
 
-    Ok(())
+    todo!()
 }
