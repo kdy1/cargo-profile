@@ -10,7 +10,7 @@ use anyhow::Error;
 use structopt::StructOpt;
 use tempdir::TempDir;
 
-/// Profiles cpu usage.
+/// WIP: Profiles cpu usage.
 #[derive(Debug, Clone, StructOpt)]
 pub enum CpuCommand {
     PerFn {
@@ -63,7 +63,7 @@ impl CpuCommand {
 
                     let collapsed = String::from_utf8_lossy(&collapsed);
 
-                    process_collapsed(997, &collapsed)
+                    process_collapsed(&collapsed)
                         .context("failed to process collapsed stack data")?;
                 }
 
@@ -73,9 +73,7 @@ impl CpuCommand {
     }
 }
 
-fn process_collapsed(freq: u32, data: &str) -> Result<(), Error> {
-    let lines = data.lines();
-
+fn process_collapsed(data: &str) -> Result<(), Error> {
     let mut fn_time_including_deps = HashMap::<_, usize>::new();
     let mut fn_time_itself = HashMap::<_, usize>::new();
 
@@ -86,7 +84,7 @@ fn process_collapsed(freq: u32, data: &str) -> Result<(), Error> {
         for (idx, mut item) in items.enumerate() {
             let is_last = idx == items_count - 1;
 
-            println!("Item: {}", item);
+            // println!("Item: {}", item);
 
             let splitted = item.split('`');
             if splitted.clone().count() != 2 {
@@ -108,7 +106,7 @@ fn process_collapsed(freq: u32, data: &str) -> Result<(), Error> {
         }
     }
 
-    println!("{:#?}", fn_time_including_deps);
+    // println!("{:#?}", fn_time_including_deps);
 
     Ok(())
 }
