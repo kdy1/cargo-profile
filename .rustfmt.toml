@@ -1,4 +1,1 @@
-required_version = "1.4.18"
 use_field_init_shorthand = true
-wrap_comments = true
-format_strings = true
