@@ -10,6 +10,7 @@ use structopt::StructOpt;
 mod cargo;
 mod flamegraph;
 mod trace;
+mod util;
 
 #[derive(StructOpt)]
 #[structopt(author, about = "The performance profiler for cargo")]
