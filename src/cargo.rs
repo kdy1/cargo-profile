@@ -186,5 +186,7 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
         bail!("cargo did not produced any useful binary\n{}", cmd_str)
     }
 
+    binaries.sort_by_key(|b| b.path.clone());
+
     Ok(binaries)
 }
