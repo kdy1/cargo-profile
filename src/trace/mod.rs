@@ -8,6 +8,7 @@ use xctrace::run_xctrace;
 
 pub mod xctrace;
 
+/// Invokes tracing tool.
 #[derive(Debug, Clone, StructOpt)]
 pub struct TraceCommand {
     /// Use sudo.

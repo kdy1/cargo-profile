@@ -4,6 +4,7 @@ use anyhow::Context;
 use anyhow::Error;
 use cargo::compile;
 use cargo::CargoTarget;
+use flamegraph::FlameGraphCommand;
 use std::env;
 use structopt::StructOpt;
 
@@ -15,28 +16,14 @@ mod util;
 #[derive(StructOpt)]
 #[structopt(author, about = "The performance profiler for cargo")]
 pub enum SubCommand {
-    /// NOT IMPLEMENTED YET. Run all benchmark and store result as a json file.
+    /// WIP. Run all benchmark and store result as a json file.
     All,
-    /// NOT IMPLEMENTED YET. Create a flamegraph for given target
-    Flamegraph {
-        /// Use sudo.
-        #[structopt(long)]
-        root: bool,
-
-        /// Compile library
-        #[structopt(subcommand)]
-        target: CargoTarget,
-
-        #[structopt(long)]
-        release: bool,
-    },
-
-    /// Invokes tracing tool.
+    Flamegraph(FlameGraphCommand),
     Trace(TraceCommand),
 
     /// Compile a binary using cargo and print absolute path to the file.
     ///
-    /// Usage: perf record `cargo profile get-bin bench --bench fixture`
+    /// Usage: perf record `cargo profile bin-path bench --bench fixture`
     BinPath {
         /// Compile library
         #[structopt(subcommand)]
@@ -58,12 +45,8 @@ fn main() -> Result<(), Error> {
 
     match cmd {
         SubCommand::All => {}
-        SubCommand::Flamegraph {
-            root,
-            target,
-            release,
-        } => {
-            compile(release, &target).context("cargo execution failed")?;
+        SubCommand::Flamegraph(cmd) => {
+            cmd.run().context("faield to create flamegraph")?;
         }
 
         SubCommand::BinPath { target, release } => {

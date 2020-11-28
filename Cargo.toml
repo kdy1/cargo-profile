@@ -10,5 +10,10 @@ version = "0.1.0"
 [dependencies]
 anyhow = "1"
 cargo_metadata = "0.12.1"
+inferno = "0.10.1"
 is_executable = "0.1.2"
 structopt = {version = "0.3"}
+tempdir = "0.3.7"
+
+[target.'cfg(unix)'.dependencies]
+signal-hook = "0.1.15"
