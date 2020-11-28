@@ -40,6 +40,10 @@ pub(crate) fn make_dtrace_command(
         escaped.push(' ');
         escaped.push_str(&arg.replace(" ", "\\ "));
     }
+    if file.is_bench {
+        escaped.push_str(" --bench");
+    }
+
     c.arg("-c");
     c.arg(&escaped);
 
