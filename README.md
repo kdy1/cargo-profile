@@ -34,7 +34,15 @@ Note: It **does not** support `dtrace` and `perf` yet. Same as above, I'll imple
 
 ### xctrace
 
+`xctrace` is a tool to profile applications on
+
 #### Usage
+
+```sh
+cargo profile trace xctrace bench --lib
+
+cargo profile trace xctrace bench --bench my_bench
+```
 
 ## License
 
