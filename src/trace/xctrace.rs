@@ -4,7 +4,7 @@ use anyhow::Context;
 use anyhow::Error;
 use std::process::Stdio;
 
-pub fn run_xctrace(root: bool, file: &BinFile) -> Result<(), Error> {
+pub fn run_xctrace(root: bool, file: &BinFile, args: &[String]) -> Result<(), Error> {
     let mut cmd = command(root, "xcrun");
 
     cmd.stdin(Stdio::inherit())
@@ -18,6 +18,7 @@ pub fn run_xctrace(root: bool, file: &BinFile) -> Result<(), Error> {
     cmd.arg("--launch")
         .arg("--")
         .arg(&file.path)
+        .args(args)
         .spawn()
         .with_context(|| {
             format!(

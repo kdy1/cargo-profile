@@ -10,16 +10,19 @@ pub mod xctrace;
 
 /// Invokes tracing tool.
 #[derive(Debug, Clone, StructOpt)]
+#[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
 pub struct TraceCommand {
     /// Use sudo.
     #[structopt(long)]
-    pub root: bool,
+    root: bool,
 
     #[structopt(long)]
-    pub release: bool,
+    release: bool,
 
     #[structopt(subcommand)]
-    pub tool: TraceTool,
+    tool: TraceTool,
+
+    args: Vec<String>,
 }
 
 impl TraceCommand {
@@ -28,6 +31,7 @@ impl TraceCommand {
             root,
             release,
             tool,
+            args,
         } = self;
 
         let binaries = match &tool {
@@ -51,7 +55,7 @@ impl TraceCommand {
             TraceTool::Dtrace { .. } => {}
             TraceTool::Perf { .. } => {}
             TraceTool::Xctrace { .. } => {
-                run_xctrace(root, &binary).context("failed to run xctrace")?;
+                run_xctrace(root, &binary, &args).context("failed to run xctrace")?;
             }
         }
 

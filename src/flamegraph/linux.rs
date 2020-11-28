@@ -10,7 +10,12 @@ use std::io::Cursor;
 use std::process::Command;
 
 /// Invoked perf to record cpu usages.
-pub(super) fn perf(root: bool, file: &BinFile, freq: Option<u32>) -> Result<Command, Error> {
+pub(super) fn perf(
+    root: bool,
+    file: &BinFile,
+    freq: Option<u32>,
+    args: &[String],
+) -> Result<Command, Error> {
     let perf = env::var("PERF").unwrap_or_else(|_| "perf".to_string());
 
     let mut c = command(root, &perf);
@@ -22,7 +27,7 @@ pub(super) fn perf(root: bool, file: &BinFile, freq: Option<u32>) -> Result<Comm
         .arg("dwarf")
         .arg("-g");
 
-    c.arg(&file.path);
+    c.arg(&file.path).args(args);
 
     Ok(c)
 }

@@ -18,6 +18,7 @@ pub(super) fn dtrace(
     output: &Path,
     freq: Option<u32>,
     custom_cmd: Option<String>,
+    args: &[String],
 ) -> Result<Command, Error> {
     let mut c = command(root, "dtrace");
 
@@ -35,8 +36,14 @@ pub(super) fn dtrace(
     c.arg("-o");
     c.arg(output);
 
+    let mut escaped = String::new();
+    escaped.push_str(&file.path.to_string_lossy());
+    for arg in args {
+        escaped.push(' ');
+        escaped.push_str(&arg.replace(" ", "\\ "));
+    }
     c.arg("-c");
-    c.arg(&file.path);
+    c.arg(&escaped);
 
     Ok(c)
 }
