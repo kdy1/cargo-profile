@@ -41,9 +41,18 @@ pub enum SubCommand {
 fn main() -> Result<(), Error> {
     let mut args = env::args_os().collect::<Vec<_>>();
 
-    if args.first().unwrap() == "cargo" && env::var("CARGO").is_ok() {
-        args.remove(1);
-    };
+    if env::var("CARGO").is_ok() {
+        if args.first().unwrap() == "cargo" {
+            args.remove(1);
+        } else {
+            if match args.get(1) {
+                Some(arg) if arg == "profile" => true,
+                _ => false,
+            } {
+                args.remove(1);
+            }
+        }
+    }
 
     let cmd: SubCommand = SubCommand::from_iter(args);
 

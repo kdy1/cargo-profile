@@ -17,7 +17,7 @@ use crate::cargo::CargoTarget;
 mod linux;
 mod macos;
 
-/// Creates a flamegraph for given target. This command
+/// Creates a flamegraph for given target.
 #[derive(Debug, Clone, StructOpt)]
 pub struct FlameGraphCommand {
     /// Use sudo.
