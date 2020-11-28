@@ -5,13 +5,14 @@ edition = "2018"
 license = "Apache-2.0/MIT"
 name = "cargo-profile"
 repository = "https://github.com/kdy1/cargo-profile.git"
-version = "0.1.1"
+version = "0.1.2"
 
 [dependencies]
 anyhow = "1"
 cargo_metadata = "0.12.1"
 inferno = "0.10.1"
 is_executable = "0.1.2"
+log = "0.4"
 structopt = {version = "0.3"}
 tempdir = "0.3.7"
 

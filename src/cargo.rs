@@ -15,6 +15,7 @@ use structopt::StructOpt;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BinFile {
     pub path: PathBuf,
+    pub is_bench: bool,
     /// `.dSYM`,
     pub extra_files: Vec<PathBuf>,
     pub profile: ArtifactProfile,
@@ -83,6 +84,7 @@ impl CargoTarget {
 pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Error> {
     let cargo = env::var("CARGO").unwrap_or_else(|_| "cargo".into());
 
+    let mut is_bench = false;
     let mut cmd = Command::new(&cargo);
 
     match target {
@@ -90,6 +92,7 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
             cmd.arg("build").arg("--bin").arg(name);
         }
         CargoTarget::Bench(kind) => {
+            is_bench = true;
             cmd.arg("bench").arg("--no-run");
             // We forward error message generation to cargo.
             if kind.lib {
@@ -171,6 +174,7 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
                             Some(v) => v,
                             None => continue,
                         },
+                        is_bench,
                         extra_files: artifact.filenames,
                         profile: artifact.profile,
                     });

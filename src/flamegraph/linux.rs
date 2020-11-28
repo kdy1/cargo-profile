@@ -27,7 +27,12 @@ pub(super) fn perf(
         .arg("dwarf")
         .arg("-g");
 
-    c.arg(&file.path).args(args);
+    c.arg(&file.path);
+    if file.is_bench {
+        c.arg("--bench");
+    }
+
+    c.args(args);
 
     Ok(c)
 }
