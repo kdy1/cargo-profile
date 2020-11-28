@@ -1,14 +1,17 @@
+use crate::cargo::compile;
+use crate::cargo::CargoTarget;
+use crate::cpu::CpuCommand;
+use crate::flamegraph::FlameGraphCommand;
 use crate::trace::TraceCommand;
 use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
-use cargo::compile;
-use cargo::CargoTarget;
-use flamegraph::FlameGraphCommand;
 use std::env;
 use structopt::StructOpt;
 
 mod cargo;
+mod cli_tools;
+mod cpu;
 mod flamegraph;
 mod trace;
 mod util;
@@ -24,6 +27,7 @@ pub enum SubCommand {
     All,
     Flamegraph(FlameGraphCommand),
     Trace(TraceCommand),
+    Cpu(CpuCommand),
 
     /// Compile a binary using cargo and print absolute path to the file.
     ///
@@ -74,6 +78,7 @@ fn main() -> Result<(), Error> {
         }
 
         SubCommand::Trace(trace) => trace.run().context("failed to trace")?,
+        SubCommand::Cpu(cmd) => cmd.run().context("failed to profile cpu usage")?,
     }
 
     Ok(())

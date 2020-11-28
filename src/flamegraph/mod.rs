@@ -13,6 +13,7 @@ use tempdir::TempDir;
 
 use crate::cargo::compile;
 use crate::cargo::CargoTarget;
+use crate::cli_tools::dtrace::make_dtrace_command;
 
 mod linux;
 mod macos;
@@ -73,7 +74,7 @@ impl FlameGraphCommand {
             eprintln!("Profiling {}", binary.path.display());
 
             let mut cmd = if cfg!(target_os = "macos") {
-                self::macos::dtrace(
+                make_dtrace_command(
                     root,
                     binary,
                     &dir.path().join(self::macos::DTRACE_OUTPUT_FILENAME),
@@ -120,7 +121,9 @@ impl FlameGraphCommand {
             }
 
             let collapsed: Vec<u8> = if cfg!(target_os = "macos") {
-                self::macos::to_collapsed(&dir.path().join(self::macos::DTRACE_OUTPUT_FILENAME))?
+                crate::cli_tools::dtrace::to_collapsed(
+                    &dir.path().join(self::macos::DTRACE_OUTPUT_FILENAME),
+                )?
             } else if cfg!(target_os = "linux") {
                 self::linux::to_collapsed()?
             } else {
