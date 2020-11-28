@@ -80,8 +80,10 @@ impl FlameGraphCommand {
                     None,
                     None,
                 )?
+            } else if cfg!(target_os = "linux") {
+                self::linux::perf(root, binary, None)?
             } else {
-                bail!("cargo profile flamegraph currently supports only mac os")
+                bail!("cargo profile flamegraph currently supports only `linux` and `macos`")
             };
             let cmd_str = format!("{:?}", cmd);
 
@@ -113,13 +115,15 @@ impl FlameGraphCommand {
             // latter case usually means the user interrupted
             // it in some way)
             if terminated_by_error(exit_status) {
-                bail!("failed to sample program: {}", cmd_str);
+                bail!("the binary file exited with an error: {}", cmd_str);
             }
 
             let collapsed: Vec<u8> = if cfg!(target_os = "macos") {
                 self::macos::to_collapsed(&dir.path().join(self::macos::DTRACE_OUTPUT_FILENAME))?
+            } else if cfg!(target_os = "linux") {
+                self::linux::to_collapsed()?
             } else {
-                bail!("cargo profile flamegraph currently supports only mac os")
+                bail!("cargo profile flamegraph currently supports only `linux` and `macos`")
             };
             let mut collapsed = Cursor::new(collapsed);
 

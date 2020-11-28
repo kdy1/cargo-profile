@@ -5,3 +5,7 @@ flamegraph.svg
 # xctrace
 *.trace
 .DS_Store
+
+# perf
+*.data
+*.old

@@ -7,7 +7,6 @@ use inferno::collapse::dtrace::Options as CollapseOptions;
 use inferno::collapse::Collapse;
 use std::fs::OpenOptions;
 use std::io::BufReader;
-use std::io::BufWriter;
 use std::path::Path;
 use std::process::Command;
 
@@ -57,12 +56,10 @@ pub(super) fn to_collapsed(stacks_file: &Path) -> Result<Vec<u8>, Error> {
 
     let mut collapsed = vec![];
 
-    let collapsed_writer = BufWriter::new(&mut collapsed);
-
     let collapse_options = CollapseOptions::default();
 
     Folder::from(collapse_options)
-        .collapse(perf_reader, collapsed_writer)
+        .collapse(perf_reader, &mut collapsed)
         .with_context(|| {
             format!(
                 "unable to collapse generated profile data from {}",

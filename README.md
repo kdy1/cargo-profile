@@ -2,11 +2,17 @@
 
 Profiling rust program made easy.
 
+# Installation
+
+```sh
+cargo install cargo-profile
+```
+
 # Features
 
 ## flamegraph
 
-Note: For now, it only supports `dtrace` on mac os x. If there are enough requests, I'll add support for perf on linux.
+Supported os: `linux`, `mac os`.
 
 ### Usage
 
