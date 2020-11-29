@@ -57,7 +57,7 @@ pub enum CargoTarget {
     Bin { name: String, args: Vec<String> },
     Bench(BenchSpecifier),
     Test(TestSpecifier),
-    Exmaple { name: String, args: Vec<String> },
+    Example { name: String, args: Vec<String> },
     Examples { args: Vec<String> },
 }
 
@@ -71,7 +71,7 @@ impl CargoTarget {
 
     pub fn args(&self) -> &[String] {
         match self {
-            CargoTarget::Exmaple { args, .. }
+            CargoTarget::Example { args, .. }
             | CargoTarget::Examples { args, .. }
             | CargoTarget::Bin { args, .. } => &args,
             CargoTarget::Bench(b) => &b.args,
@@ -123,7 +123,7 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
                 cmd.arg("--tests");
             }
         }
-        CargoTarget::Exmaple { name, .. } => {
+        CargoTarget::Example { name, .. } => {
             cmd.arg("build").arg("--example").arg(name);
         }
         CargoTarget::Examples { .. } => {
