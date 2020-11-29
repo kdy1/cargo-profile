@@ -34,6 +34,18 @@ Here comes `cargo profile bin-path` to aid it.
 perf record `cargo profile bin-path bench --bench fixture`
 ```
 
+## cpu time profiling
+
+You can get cpu time usage per function on mac os using the command below.
+
+(For linux, you can use perf directly, although I'll add linux aupport soon.)
+
+### Usage
+
+```sh
+cargo profile cpu per-fn bench --bench fixture
+```
+
 ## trace
 
 Note: It **does not** support `dtrace` and `perf` yet. Same as above, I'll implement it if there's a need.
