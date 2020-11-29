@@ -15,6 +15,9 @@ mod merge;
 /// WIP: Profiles cpu usage.
 #[derive(Debug, Clone, StructOpt)]
 pub enum CpuCommand {
+    /// Profiles the program and print results in order of (total, local, function name).
+    ///
+    /// Note that cpu usage can be larger thsn 100%, if threads are used.
     PerFn {
         /// Use sudo.
         #[structopt(long)]
