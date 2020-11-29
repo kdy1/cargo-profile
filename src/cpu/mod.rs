@@ -69,12 +69,16 @@ impl CpuCommand {
                         .context("failed to process collapsed stack data")?;
                     data.sort_by_key(|info| info.total_used);
 
+                    println!(
+                        "{: <10}  | {: <10}  | {}",
+                        "Totql time", "Own time", "File name",
+                    );
                     for info in data.iter().rev() {
                         println!(
-                            "{}: {}% {}%",
-                            info.name,
+                            "{: <10.1}% | {: <10.1}% | {}",
                             info.total_used as f64 / time as f64 * 100f64,
-                            info.self_used as f64 / time as f64 * 100f64
+                            info.self_used as f64 / time as f64 * 100f64,
+                            info.name,
                         );
                     }
                 }
