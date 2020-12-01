@@ -205,7 +205,7 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
         .with_context(|| format!("Couldn't get cargo's exit status\n{}", cmd_str))?;
 
     if binaries.is_empty() {
-        bail!("cargo did not produced any useful binary\n{}", cmd_str)
+        bail!("cargo did not produce any useful binary\n{}", cmd_str)
     }
 
     binaries.sort_by_key(|b| b.path.clone());

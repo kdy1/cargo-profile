@@ -63,7 +63,7 @@ fn main() -> Result<(), Error> {
     match cmd {
         SubCommand::All => {}
         SubCommand::Flamegraph(cmd) => {
-            cmd.run().context("faield to create flamegraph")?;
+            cmd.run().context("failed to create flamegraph")?;
         }
 
         SubCommand::BinPath { target, release } => {
