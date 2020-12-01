@@ -155,6 +155,7 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
                 if artifact.target.kind.contains(&"bin".to_string())
                     || artifact.target.kind.contains(&"test".to_string())
                     || artifact.target.kind.contains(&"bench".to_string())
+                    || artifact.target.kind.contains(&"example".to_string())
                 {
                     let mut executable = None;
 
