@@ -212,3 +212,12 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
 
     Ok(binaries)
 }
+
+pub fn cargo_workspace() -> Result<PathBuf, Error> {
+    let md = cargo_metadata::MetadataCommand::new()
+        .no_deps()
+        .exec()
+        .context("cargo metadata failed")?;
+
+    Ok(md.workspace_root)
+}
