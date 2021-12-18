@@ -2,7 +2,7 @@
 authors = ["강동윤 <kdy1@dudy.kr>"]
 description = "Cargo subcommand to profile performance"
 edition = "2018"
-license = "Apache-2.0/MIT"
+license = "Apache-2.0"
 name = "cargo-profile"
 repository = "https://github.com/kdy1/cargo-profile.git"
 version = "0.1.8"
