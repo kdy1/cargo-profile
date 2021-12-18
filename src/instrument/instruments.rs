@@ -2,15 +2,13 @@
 //!
 //! interfacing with the `instruments` command line tool
 
+use super::InstrumentsCommand;
+use crate::cargo::cargo_workspace;
 use anyhow::{anyhow, Result};
 use semver::Version;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
-
-use crate::cargo::cargo_workspace;
-
-use super::InstrumentsCommand;
 
 /// Holds available templates.
 pub struct TemplateCatalog {
@@ -481,6 +479,8 @@ pub(crate) fn profile_target(
     if !cmd.target_args.is_empty() {
         command.args(cmd.target_args.as_slice());
     }
+
+    eprintln!("Running {:?}", command);
 
     let output = command.output()?;
 
