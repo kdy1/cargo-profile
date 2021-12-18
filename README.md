@@ -16,6 +16,12 @@ Supported os: `mac os`.
 
 Fork of https://github.com/cmyr/cargo-instruments, but uses `cargo` cli for compilation to avoid removing cache.
 
+### Usage
+
+```
+cargo profile instruments -t time bench --bench parser
+```
+
 ## flamegraph
 
 Supported os: `linux`, `mac os`.
