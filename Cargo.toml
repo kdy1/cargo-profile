@@ -2,17 +2,19 @@
 authors = ["강동윤 <kdy1@dudy.kr>"]
 description = "Cargo subcommand to profile performance"
 edition = "2018"
-license = "Apache-2.0/MIT"
+license = "Apache-2.0"
 name = "cargo-profile"
 repository = "https://github.com/kdy1/cargo-profile.git"
-version = "0.1.7"
+version = "0.1.8"
 
 [dependencies]
 anyhow = "1"
 cargo_metadata = "0.12.1"
+chrono = "0.4.19"
 inferno = "0.10.2"
 is_executable = "0.1.2"
 log = "0.4"
+semver = "1.0.4"
 structopt = {version = "0.3"}
 tempdir = "0.3.7"
 
