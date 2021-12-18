@@ -10,7 +10,7 @@ use std::process::{Command, Output};
 
 use crate::cargo::cargo_workspace;
 
-use super::InstrumentCommand;
+use super::InstrumentsCommand;
 
 /// Holds available templates.
 pub struct TemplateCatalog {
@@ -449,7 +449,7 @@ fn abbrev_name(template_name: &str) -> Option<&str> {
 pub(crate) fn profile_target(
     target_filepath: &Path,
     xctrace_tool: &XcodeInstruments,
-    cmd: &InstrumentCommand,
+    cmd: &InstrumentsCommand,
 ) -> Result<PathBuf> {
     // 1. Get the template name from config
     // This borrows a ref to the String in Option<String>. The value can be

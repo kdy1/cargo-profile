@@ -2,7 +2,7 @@ use crate::cargo::compile;
 use crate::cargo::CargoTarget;
 use crate::cpu::CpuCommand;
 use crate::flamegraph::FlameGraphCommand;
-use crate::instrument::InstrumentCommand;
+use crate::instrument::InstrumentsCommand;
 use crate::trace::TraceCommand;
 use anyhow::bail;
 use anyhow::Context;
@@ -31,7 +31,7 @@ pub enum SubCommand {
     Trace(TraceCommand),
     Cpu(CpuCommand),
 
-    Instrument(InstrumentCommand),
+    Instruments(InstrumentsCommand),
 
     /// Compile a binary using cargo and print absolute path to the file.
     ///
@@ -83,7 +83,7 @@ fn main() -> Result<(), Error> {
 
         SubCommand::Trace(trace) => trace.run().context("failed to trace")?,
         SubCommand::Cpu(cmd) => cmd.run().context("failed to profile cpu usage")?,
-        SubCommand::Instrument(cmd) => cmd.run().context("failed to instrument")?,
+        SubCommand::Instruments(cmd) => cmd.run().context("failed to instrument")?,
     }
 
     Ok(())

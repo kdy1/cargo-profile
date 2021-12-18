@@ -12,7 +12,7 @@ mod instruments;
 /// This is required because cargo-instruments uses statically linked cargo and removes the cache for cargo build.
 #[derive(Debug, Clone, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
-pub struct InstrumentCommand {
+pub struct InstrumentsCommand {
     /// Compile library
     #[structopt(subcommand)]
     target: CargoTarget,
@@ -54,7 +54,7 @@ pub struct InstrumentCommand {
     target_args: Vec<String>,
 }
 
-impl InstrumentCommand {
+impl InstrumentsCommand {
     pub fn run(self) -> Result<(), Error> {
         // 1. Detect the type of Xcode Instruments installation
         let xctrace_tool = instruments::XcodeInstruments::detect()?;
