@@ -11,15 +11,10 @@ mod instruments;
 /// This is fork of [cargo-instruments] which uses CLI instead of cargo to build crate.
 /// This is required because cargo-instruments uses statically linked cargo and removes the cache for cargo build.
 #[derive(Debug, Clone, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
 pub struct InstrumentsCommand {
     /// Compile library
-    #[structopt(subcommand)]
+    #[structopt(flatten)]
     target: CargoTarget,
-
-    /// Build in debug mode
-    #[structopt(long)]
-    debug: bool,
 
     /// List available templates
     #[structopt(short = "l", long)]
@@ -45,13 +40,6 @@ pub struct InstrumentsCommand {
     /// Do not open the generated trace file in Instruments.app.
     #[structopt(long)]
     no_open: bool,
-
-    /// Arguments passed to the target binary.
-    ///
-    /// To pass flags, precede child args with `--`,
-    /// e.g. `cargo instruments -- -t test1.txt --slow-mode`.
-    #[structopt(value_name = "ARGS")]
-    target_args: Vec<String>,
 }
 
 impl InstrumentsCommand {
@@ -68,7 +56,7 @@ impl InstrumentsCommand {
 
         // 3. Build the specified target
         let workspace = cargo_workspace()?;
-        let binaries = compile(true, &self.target).context("failed to compile")?;
+        let binaries = compile(&self.target).context("failed to compile")?;
 
         if binaries.len() != 1 {
             bail!(
@@ -77,7 +65,7 @@ impl InstrumentsCommand {
             )
         }
 
-        let target_filepath = compile(!self.debug, &self.target).context("failed to compile")?;
+        let target_filepath = compile(&self.target).context("failed to compile")?;
         let target_filepath = if target_filepath.len() == 1 {
             target_filepath.into_iter().next().unwrap()
         } else {

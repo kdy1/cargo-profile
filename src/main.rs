@@ -38,11 +38,8 @@ pub enum SubCommand {
     /// Usage: perf record `cargo profile bin-path bench --bench fixture`
     BinPath {
         /// Compile library
-        #[structopt(subcommand)]
+        #[structopt(flatten)]
         target: CargoTarget,
-
-        #[structopt(long)]
-        release: bool,
     },
 }
 
@@ -70,8 +67,8 @@ fn main() -> Result<(), Error> {
             cmd.run().context("failed to create flamegraph")?;
         }
 
-        SubCommand::BinPath { target, release } => {
-            let binraries = compile(release, &target).context("cargo execution failed")?;
+        SubCommand::BinPath { target } => {
+            let binraries = compile(&target).context("cargo execution failed")?;
             if binraries.len() != 1 {
                 bail!(
                     "cargo produced too many binaries, which is not supoprted by `cargo profile \

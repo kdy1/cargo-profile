@@ -24,23 +24,16 @@ pub enum CpuCommand {
         root: bool,
 
         /// Compile library
-        #[structopt(subcommand)]
+        #[structopt(flatten)]
         target: CargoTarget,
-
-        #[structopt(long)]
-        release: bool,
     },
 }
 
 impl CpuCommand {
     pub fn run(self) -> Result<(), Error> {
         match self {
-            CpuCommand::PerFn {
-                root,
-                target,
-                release,
-            } => {
-                let binaries = compile(release, &target).context("failed to compile")?;
+            CpuCommand::PerFn { root, target } => {
+                let binaries = compile(&target).context("failed to compile")?;
 
                 for binary in &binaries {
                     let dir =

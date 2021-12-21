@@ -23,22 +23,15 @@ pub struct FlameGraphCommand {
     root: bool,
 
     /// Compile library
-    #[structopt(subcommand)]
+    #[structopt(flatten)]
     target: CargoTarget,
-
-    #[structopt(long)]
-    release: bool,
 }
 
 impl FlameGraphCommand {
     pub fn run(self) -> Result<(), Error> {
-        let Self {
-            root,
-            target,
-            release,
-        } = self;
+        let Self { root, target } = self;
 
-        let binaries = compile(release, &target).context("cargo execution failed")?;
+        let binaries = compile(&target).context("cargo execution failed")?;
 
         if binaries.len() != 1 {
             // TODO
