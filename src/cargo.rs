@@ -81,6 +81,9 @@ pub struct CargoTarget {
     #[structopt(long)]
     examples: bool,
 
+    #[structopt(long)]
+    features: Option<Vec<String>>,
+
     /// Arguments passed to the target binary.
     ///
     /// To pass flags, precede child args with `--`,
@@ -100,7 +103,8 @@ impl CargoTarget {
 }
 
 /// Compile one or more targets.
-pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Error> {
+pub fn compile(target: &CargoTarget) -> Result<Vec<BinFile>, Error> {
+    let release = target.release;
     let cargo = env::var("CARGO").unwrap_or_else(|_| "cargo".into());
 
     let mut is_bench = false;

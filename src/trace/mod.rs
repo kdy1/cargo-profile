@@ -16,24 +16,17 @@ pub struct TraceCommand {
     #[structopt(long)]
     root: bool,
 
-    #[structopt(long)]
-    release: bool,
-
     #[structopt(subcommand)]
     tool: TraceTool,
 }
 
 impl TraceCommand {
     pub fn run(self) -> Result<(), Error> {
-        let Self {
-            root,
-            release,
-            tool,
-        } = self;
+        let Self { root, tool } = self;
 
         let target = tool.target();
 
-        let binaries = compile(release, target).context("cargo execution failed")?;
+        let binaries = compile(target).context("cargo execution failed")?;
 
         if binaries.len() != 1 {
             bail!(

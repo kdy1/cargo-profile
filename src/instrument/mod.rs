@@ -16,10 +16,6 @@ pub struct InstrumentsCommand {
     #[structopt(flatten)]
     target: CargoTarget,
 
-    /// Build in debug mode
-    #[structopt(long)]
-    debug: bool,
-
     /// List available templates
     #[structopt(short = "l", long)]
     list_templates: bool,
@@ -60,7 +56,7 @@ impl InstrumentsCommand {
 
         // 3. Build the specified target
         let workspace = cargo_workspace()?;
-        let binaries = compile(true, &self.target).context("failed to compile")?;
+        let binaries = compile(&self.target).context("failed to compile")?;
 
         if binaries.len() != 1 {
             bail!(
@@ -69,7 +65,7 @@ impl InstrumentsCommand {
             )
         }
 
-        let target_filepath = compile(!self.debug, &self.target).context("failed to compile")?;
+        let target_filepath = compile(&self.target).context("failed to compile")?;
         let target_filepath = if target_filepath.len() == 1 {
             target_filepath.into_iter().next().unwrap()
         } else {
