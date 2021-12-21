@@ -53,30 +53,49 @@ pub struct BenchSpecifier {
 
 #[derive(Debug, Clone, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
-pub enum CargoTarget {
-    Bin { name: String, args: Vec<String> },
-    Bench(BenchSpecifier),
-    Test(TestSpecifier),
-    Example { name: String, args: Vec<String> },
-    Examples { args: Vec<String> },
+pub struct CargoTarget {
+    #[structopt(long)]
+    lib: bool,
+
+    #[structopt(long)]
+    release: bool,
+
+    #[structopt(long)]
+    bin: Option<String>,
+
+    #[structopt(long)]
+    bench: Option<String>,
+
+    #[structopt(long)]
+    benches: bool,
+
+    #[structopt(long)]
+    test: Option<String>,
+
+    #[structopt(long)]
+    tests: bool,
+
+    #[structopt(long)]
+    example: Option<String>,
+
+    #[structopt(long)]
+    examples: bool,
+
+    /// Arguments passed to the target binary.
+    ///
+    /// To pass flags, precede child args with `--`,
+    /// e.g. `cargo profile subcommand -- -t test1.txt --slow-mode`.
+    #[structopt(value_name = "ARGS")]
+    target_args: Vec<String>,
 }
 
 impl CargoTarget {
     pub fn supports_release_flag(&self) -> bool {
-        match self {
-            CargoTarget::Bench(_) => false,
-            _ => true,
-        }
+        self.tests || self.test.is_some() || self.examples || self.example.is_some()
     }
 
     pub fn args(&self) -> &[String] {
-        match self {
-            CargoTarget::Example { args, .. }
-            | CargoTarget::Examples { args, .. }
-            | CargoTarget::Bin { args, .. } => &args,
-            CargoTarget::Bench(b) => &b.args,
-            CargoTarget::Test(t) => &t.args,
-        }
+        &self.target_args
     }
 }
 
@@ -87,53 +106,56 @@ pub fn compile(release: bool, target: &CargoTarget) -> Result<Vec<BinFile>, Erro
     let mut is_bench = false;
     let mut cmd = Command::new(&cargo);
 
-    match target {
-        CargoTarget::Bin { name, .. } => {
-            cmd.arg("build").arg("--bin").arg(name);
+    if target.benches || target.bench.is_some() {
+        is_bench = true;
+
+        cmd.arg("bench").arg("--no-run");
+
+        if !release {
+            cmd.arg("--debug");
         }
-        CargoTarget::Bench(kind) => {
-            is_bench = true;
-            cmd.arg("bench").arg("--no-run");
-            // We forward error message generation to cargo.
-            if kind.lib {
-                cmd.arg("--lib");
-            }
 
-            if let Some(name) = &kind.bench {
-                cmd.arg("--bench").arg(name);
-            }
-
-            if kind.benches {
-                cmd.arg("--benches");
-            }
+        if target.benches {
+            cmd.arg("--benches");
         }
-        CargoTarget::Test(kind) => {
-            cmd.arg("test").arg("--no-run");
 
-            // We forward error message generation to cargo.
-            if kind.lib {
-                cmd.arg("--lib");
-            }
-
-            if let Some(name) = &kind.test {
-                cmd.arg("--test").arg(name);
-            }
-
-            if kind.tests {
-                cmd.arg("--tests");
-            }
+        if let Some(target) = &target.bench {
+            cmd.arg("--bench").arg(target);
         }
-        CargoTarget::Example { name, .. } => {
-            cmd.arg("build").arg("--example").arg(name);
+    } else if target.tests || target.test.is_some() {
+        cmd.arg("test").arg("--no-run");
+
+        if release {
+            cmd.arg("--release");
         }
-        CargoTarget::Examples { .. } => {
-            cmd.arg("build").arg("--examples");
+
+        if target.tests {
+            cmd.arg("--tests");
+        }
+
+        if let Some(target) = &target.test {
+            cmd.arg("--test").arg(target);
+        }
+    } else {
+        cmd.arg("build");
+
+        if release {
+            cmd.arg("--release");
+        }
+
+        if target.lib {
+            cmd.arg("--lib");
+        }
+
+        if target.examples {
+            cmd.arg("--examples");
+        }
+
+        if let Some(target) = &target.example {
+            cmd.arg("--example").arg(target);
         }
     }
 
-    if release && target.supports_release_flag() {
-        cmd.arg("--release");
-    }
     cmd.arg("--message-format=json");
 
     let cmd_str = format!("{:?}", cmd);

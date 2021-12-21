@@ -476,8 +476,8 @@ pub(crate) fn profile_target(
 
     command.arg(&target_filepath);
 
-    if !cmd.target_args.is_empty() {
-        command.args(cmd.target_args.as_slice());
+    if !cmd.target.args().is_empty() {
+        command.args(cmd.target.args());
     }
 
     eprintln!("Running {:?}", command);

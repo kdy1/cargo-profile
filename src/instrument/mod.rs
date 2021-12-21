@@ -11,7 +11,6 @@ mod instruments;
 /// This is fork of [cargo-instruments] which uses CLI instead of cargo to build crate.
 /// This is required because cargo-instruments uses statically linked cargo and removes the cache for cargo build.
 #[derive(Debug, Clone, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
 pub struct InstrumentsCommand {
     /// Compile library
     #[structopt(flatten)]
@@ -45,13 +44,6 @@ pub struct InstrumentsCommand {
     /// Do not open the generated trace file in Instruments.app.
     #[structopt(long)]
     no_open: bool,
-
-    /// Arguments passed to the target binary.
-    ///
-    /// To pass flags, precede child args with `--`,
-    /// e.g. `cargo instruments -- -t test1.txt --slow-mode`.
-    #[structopt(value_name = "ARGS")]
-    target_args: Vec<String>,
 }
 
 impl InstrumentsCommand {
