@@ -160,6 +160,10 @@ pub fn compile(target: &CargoTarget) -> Result<Vec<BinFile>, Error> {
         }
     }
 
+    if let Some(features) = &target.features {
+        cmd.arg("--features").arg(features.join(","));
+    }
+
     cmd.arg("--message-format=json");
 
     let cmd_str = format!("{:?}", cmd);
@@ -174,9 +178,7 @@ pub fn compile(target: &CargoTarget) -> Result<Vec<BinFile>, Error> {
     let reader = BufReader::new(child.stdout.take().unwrap());
     for message in Message::parse_stream(reader) {
         match message.unwrap() {
-            Message::CompilerMessage(msg) => {
-                eprintln!("{}", msg.message.message);
-            }
+            Message::CompilerMessage(..) => {}
             Message::CompilerArtifact(mut artifact) => {
                 if artifact.target.kind.contains(&"bin".to_string())
                     || artifact.target.kind.contains(&"test".to_string())
