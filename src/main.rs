@@ -38,7 +38,7 @@ pub enum SubCommand {
     /// Usage: perf record `cargo profile bin-path bench --bench fixture`
     BinPath {
         /// Compile library
-        #[structopt(subcommand)]
+        #[structopt(flatten)]
         target: CargoTarget,
 
         #[structopt(long)]

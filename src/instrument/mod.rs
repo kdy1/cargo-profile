@@ -14,7 +14,7 @@ mod instruments;
 #[structopt(setting = structopt::clap::AppSettings::TrailingVarArg)]
 pub struct InstrumentsCommand {
     /// Compile library
-    #[structopt(subcommand)]
+    #[structopt(flatten)]
     target: CargoTarget,
 
     /// Build in debug mode

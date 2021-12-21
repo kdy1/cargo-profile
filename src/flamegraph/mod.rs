@@ -23,7 +23,7 @@ pub struct FlameGraphCommand {
     root: bool,
 
     /// Compile library
-    #[structopt(subcommand)]
+    #[structopt(flatten)]
     target: CargoTarget,
 
     #[structopt(long)]
